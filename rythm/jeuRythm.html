@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>tests</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+
+</head>
+<body>
+<script>
+
+    let cursors;
+    let shield;
+    let shieldHitBox;
+    let star;
+
+    let btnScore;
+    let scores = 0;
+    let multiplieur = 1;
+
+    let audio;
+    let tick;
+    let btnAudio;
+
+
+    let intro1;
+    let intro2;
+
+
+
+    class Example extends Phaser.Scene
+
+    {
+
+        createAttaque2(sec,vitesse) {
+
+            let flocon;
+            let distance = vitesse * sec;
+
+            let x = (Math.random() * distance) - (Math.random() * distance);
+            let y = Math.sqrt(Math.pow(distance,2) - Math.pow(x,2));
+            Math.random() > 0.5 ? y = -y : y = y;
+
+            //on cree le flocon au coord de depart plus les coords calculer pour arriver a SEC seconde au centre
+            flocon =  this.physics.add.image(x + star.x, y + star.y,'flocon').setScale(0.2);
+            flocon.setVelocity(0,0);
+
+            var angleCentre = Phaser.Math.Angle.Between(flocon.x, flocon.y, star.x, star.y);
+
+            flocon.setVelocityX(Math.cos(angleCentre) * vitesse);
+            flocon.setVelocityY(Math.sin(angleCentre) * vitesse);
+
+            // Quand le son touche le shield, il est détruit
+            this.physics.add.overlap(shieldHitBox, flocon, function () {
+                flocon.destroy();
+                tick.play();
+                multiplieur += 0.01;
+                scores = 1 + scores*multiplieur;
+
+            }, null, this);
+
+            this.physics.add.overlap(star, flocon, function () {
+                flocon.destroy();
+                multiplieur = 1;
+                scores = scores + 1;
+            }, null, this);
+        }
+
+        initJeu() {
+            star = this.physics.add.image(640,360,'star');
+            this.add.image(640,360,'circle').setScale(0.4);
+
+            shield = this.add.image(640,360,'shield').setScale(0.4);
+
+            shieldHitBox = this.physics.add.image(355.2,360,'shieldHitBox').setScale(2.4);
+            shieldHitBox.body.allowGravity = false;
+            shieldHitBox.setAlpha(0);
+
+            star.body.allowGravity = false;
+
+            shieldHitBox.body.setCircle(25);
+
+            star.body.setCircle(76);
+            star.body.setOffset(-64,-64);
+
+            cursors = this.input.activePointer;
+
+            const beat = 60 / 152;
+
+            intro1 = [
+                1.808,
+                1.808 + beat,
+
+                3.391,
+                3.391 + beat,
+
+                5.023,
+                5.023 + beat,
+
+                6.609,
+                6.609 + beat,
+
+                8.233,
+                8.233 + beat,
+
+                9.800,
+                9.800 + beat,
+
+                11.427,
+                11.427 + beat,
+
+                13.026,
+                13.026 + beat,
+
+                14.610,
+                14.610 + beat,
+                14.610 + beat * 2,
+
+                16.197,
+                16.197 + beat,
+                16.197 + beat * 2,
+
+                17.822,
+                17.822 + beat,
+                17.822 + beat *2,
+                17.822 + beat *3,
+                17.822 + beat *4,
+                17.822 + beat *5,
+                17.822 + beat *6,
+                17.822 + beat *7,
+                17.822 + beat *8,
+                17.822 + beat *9,
+
+                22.602,
+                22.602 +beat,
+
+                24.311,
+                24.311 + beat,
+
+                25.824,
+                25.824 + beat
+            ];
+
+            intro2 = [
+                27.381,
+                27.381 + beat,
+                27.381 + beat * 2,
+
+                28.982,
+                28.982 + beat,
+
+                29.645,
+
+                29.781,
+
+                30.602,
+                30.602 + beat,
+                30.602 + beat * 2,
+
+                32.181,
+                32.181 + beat,
+                32.181+ beat * 2,
+
+                33.845,
+                33.845 + beat,
+                33.845 + beat * 2,
+
+                35.444,
+                35.444 + beat,
+
+                36.045,
+
+                36.210,
+
+                37.043,
+                37.043 + beat,
+                37.043 + beat * 2,
+
+                38.603,
+                38.603 + beat,
+                38.603 + beat * 2,
+
+                40.240,
+                40.240 + beat,
+                40.240 + beat * 2,
+
+                41.845,
+                41.845 + beat,
+
+                42.446,
+
+                42.575,
+
+                43.422,
+                43.422 + beat,
+                43.422 + beat * 2,
+
+                45.044,
+
+                45.344,
+
+                45.641,
+
+                45.777,
+
+                46.638,
+                46.638 + beat,
+                46.638 + beat * 2,
+
+                48.242,
+                48.242 + beat,
+
+                48.844,
+
+                48.974,
+
+                49.845,
+                49.845 + beat,
+                49.845 + beat * 2,
+
+                51.445,
+
+                51.745,
+
+                52.045,
+
+                52.178,
+
+                53.046,
+                53.046 + beat,
+                53.046 + beat * 2,
+
+                54.644,
+                54.644 + beat,
+                54.644 + beat * 2,
+
+                56.242,
+                56.242 + beat,
+                56.242 + beat * 2,
+
+                57.846,
+
+                58.144,
+
+                58.479,
+
+                58.577,
+                58.577 + beat,
+                58.577 + beat * 2,
+                58.577 + beat * 3,
+                58.577 + beat * 4,
+
+                61.044,
+                61.044 + beat,
+                61.044 + beat * 2,
+
+                61.644,
+
+                61.777,
+
+                62.641,
+                62.641 + beat,
+                62.641 + beat * 2,
+
+                64.242,
+
+                64.545,
+
+                64.846,
+
+                64.977,
+
+                65.871,
+
+                68.996,
+                68.996 + beat,
+                68.996 + beat * 2,
+                68.996 + beat * 3,
+                68.996 + beat * 4,
+                68.996 + beat * 5,
+                68.996 + beat * 6,
+
+                71.593,
+
+                71.998,
+
+                72.181,
+                72.181 + beat * 0.5,
+                72.181 + beat * 1,
+                72.181 + beat * 1.5,
+                72.181 + beat * 2,
+                72.181 + beat * 2.5,
+                72.181 + beat * 3,
+                72.181 + beat * 3.5,
+                72.181 + beat * 4,
+                72.181 + beat * 4.5,
+                72.181 + beat * 5,
+                72.181 + beat * 5.5,
+                72.181 + beat * 6,
+                72.181 + beat * 6.5,
+                72.181 + beat * 7,
+                72.181 + beat * 7.5,
+
+                75.397,
+                75.397 + beat * 0.25,
+                75.397 + beat * 0.5,
+                75.397 + beat * 0.75,
+                75.397 + beat * 1,
+                75.397 + beat * 1.25,
+                75.397 + beat * 1.5,
+                75.397 + beat * 1.75,
+                75.397 + beat * 2,
+                75.397 + beat * 2.25,
+                75.397 + beat * 2.5,
+                75.397 + beat * 2.75,
+                75.397 + beat * 3,
+                75.397 + beat * 3.25,
+                75.397 + beat * 3.5,
+                75.397 + beat * 3.75,
+
+
+                78.647,
+
+                78.779,
+
+                78,984,
+
+                79.183,
+
+                79.379,
+
+                79.582,
+
+                79.777,
+
+                79.980,
+
+                80.247,
+
+                80.486,
+
+                80.809,
+
+                80.988,
+
+                81.776,
+
+                81.991,
+
+                82.184,
+
+                82.382,
+
+                82.577,
+
+                82.790,
+
+                82.984,
+
+                83.179,
+
+                83.372,
+
+                83.583,
+
+                83.682,
+
+                83.778,
+
+                83.978,
+
+                84.179,
+
+                84.380,
+
+                84.581,
+
+                85.183,
+
+                85.382,
+
+                85.588,
+
+                85.790,
+
+                85.993,
+
+                86.185,
+
+                86.392,
+
+                86.585,
+
+                86.850,
+
+                86.880,
+
+                87.126,
+
+                88.180,
+
+                88.376,
+
+                88.586,
+
+                88.780,
+
+                88.973,
+
+                89.178,
+
+                89.378,
+
+                89.578,
+
+                89.789,
+
+                90.553,
+
+                91.391,
+
+                91.589,
+
+                91.777,
+
+                91.987,
+
+                92.182,
+
+                92.389,
+
+                92.584,
+
+                92.787,
+
+                92.989,
+
+                93.251,
+
+                93.281,
+
+                93.774,
+
+                94.601,
+
+                94.782,
+
+                94.985,
+
+                95.199,
+
+                95.374,
+
+                95.583,
+
+                95.787,
+
+                95.984,
+
+                96.083,
+
+                97.777,
+
+                97.985,
+
+                98.181,
+
+                98.378,
+
+                98.584,
+
+                98.788,
+
+                98.982,
+
+                99.182,
+
+                99.395,
+
+                99.650,
+
+                99.681,
+
+                100.168,
+
+                100.982,
+
+                101.187,
+
+                101.380,
+
+                101.580,
+
+                101.770,
+
+                102.179,
+
+                102.179,
+
+                102.378,
+
+                102.578,
+
+                102.878,
+
+                103.180,
+
+                103.376,
+                103.376 + beat *  0.25,
+                103.376 + beat *  0.5,
+                103.376 + beat *  0.75,
+                103.376 + beat *  1,
+                103.376 + beat *  1.25,
+                103.376 + beat *  1.5,
+                103.376 + beat *  1.75,
+                103.376 + beat *  2
+            ];
+
+
+
+
+        }
+
+        lancerJeu() {
+            intro1.map((timing) => {
+                this.createAttaque2(timing + 0.70,200);
+            });
+
+            intro2.map((timing) => {
+                this.createAttaque2(timing + 0.50,250);
+            });
+
+
+        }
+
+
+        preload ()
+        {
+            this.load.image('star', 'img/star.png');
+            this.load.image('circle', 'img/circle.png');
+            this.load.image('shield', 'img/shield.png');
+            this.load.image('flocon','img/flocon.png');
+            this.load.image('shieldHitBox','img/joliebar.png');
+
+            //bpm 152
+            //début 1:808
+            this.load.audio('audio', 'son/superhero.mp3');
+            this.load.audio('tick', 'son/tick.wav');
+
+        }
+
+
+        create ()
+        {
+
+            audio = this.sound.add('audio').setVolume(0.8);
+            tick = this.sound.add('tick').setVolume(0.25);
+
+            btnScore = this.add.text(20, 20, 'Score : ' + scores);
+
+            this.initJeu();
+
+            btnAudio = this.add.text(20, 40,'lancer le jeu').setBackgroundColor('#ff0000');
+            btnAudio.setInteractive();
+
+            btnAudio.on('pointerdown', function() {
+                btnAudio.destroy();
+                audio.play();
+                this.lancerJeu();
+
+
+            },this);
+
+        }
+
+        update () {
+
+            // Calculez l'angle entre la position du shield et la position du curseur
+            var angleCurseur = Phaser.Math.Angle.Between(shield.x, shield.y, cursors.x, cursors.y);
+
+            // Convertissez l'angle en degrés et ajustez l'angle de l'image du shield
+            shield.angle = (Phaser.Math.RadToDeg(angleCurseur) + 135);
+            shieldHitBox.angle = (Phaser.Math.RadToDeg(angleCurseur) + 90);
+            shieldHitBox.body.setOffset(0,-22);
+
+            shieldHitBox.setPosition(shield.x + (Math.cos(angleCurseur) * 35),shield.y + (Math.sin(angleCurseur) * 35));
+
+            btnScore.text = 'Score : ' + parseInt(scores);
+
+
+        }
+    }
+
+    const config = {
+        type: Phaser.AUTO,
+        parent: 'phaser-example',
+        width: 1280, //640
+        height: 720, //360
+        scene: Example,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                debug: false
+            }
+        }
+    };
+
+
+
+    const game = new Phaser.Game(config);
+</script>
+
+<div class="boutonGenerale">
+    <button onclick="window.location.href='../index.html'">Retour</button>
+    <button onclick="window.location.href='./jeuRythm.html'">Rejouer</button>
+</div>
+
+
+</body>
+</html>
+
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000000;
+        margin: 0;
+        padding: 0;
+    }
+
+    button {
+        background-color: #ff0000;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+    }
+
+</style>
